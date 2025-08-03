@@ -7,11 +7,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 import time
 import os
-# راه‌اندازی درایور
+
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 wait = WebDriverWait(driver, 10)
 
-# لینک لیست دکترها
 url = "https://doctor-yab.ir/Search/City-7/Takhasos-1045/?page=2"
 driver.get(url)
 
@@ -29,19 +28,17 @@ for btn in span_buttons:
 
 new_data = []
 
-# پیمایش لینک‌ها
 for i, link in enumerate(doctor_links):
     try:
         driver.get(link)
         time.sleep(2)
 
-        # گرفتن نام و تخصص
         try:
             name = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "fgth1name"))).text.strip()
             specialty = driver.find_element(By.CLASS_NAME, "a-description").text.strip()
         except:
             continue  
-        # گرفتن کامنت‌ها
+
         doctor_comments = driver.find_elements(By.CLASS_NAME, "comment-text")
         has_valid_comment = False
 
@@ -56,7 +53,6 @@ for i, link in enumerate(doctor_links):
                 tags_list = comment_block.find_elements(By.XPATH, ".//ul/li[@class='like']")
                 tags = ", ".join([tag.text.strip() for tag in tags_list if tag.text.strip()]) or "بدون تگ"
 
-                # ذخیره اطلاعات
                 new_data.append({
                     "نام پزشک": name,
                     "تخصص": specialty,
@@ -75,7 +71,6 @@ for i, link in enumerate(doctor_links):
     except Exception as e:
         print(f"❌ خطا در دکتر {i+1}: {e}")
 
-# ذخیره در اکسل
 file_path = "C:/Users/Quantom/Desktop/uni/doctor_info.xlsx"
 df_new = pd.DataFrame(new_data)
 
@@ -89,3 +84,4 @@ final_df.drop_duplicates(inplace=True)
 final_df.to_excel(file_path, index=False, engine="openpyxl")
 print("\n✅ فقط دکترهای دارای کامنت ذخیره شدند.")
 driver.quit()
+
